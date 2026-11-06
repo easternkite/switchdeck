@@ -34,6 +34,7 @@ data class GpuInfo(
         MALI_LATEST("Mali-G715/G725/G925"),
         /** A Mali no open driver build covers: the Vulkan bridge is its only path. */
         MALI_OTHER("Mali"),
+        NVIDIA_TEGRA("NVIDIA Tegra"),
         NOT_ADRENO("Not an Adreno GPU");
 
         val mali: Boolean get() = name.startsWith("MALI_")
@@ -64,6 +65,7 @@ data class GpuInfo(
             Support.UNTESTED -> when {
                 family == Family.POWERVR -> if (name.contains("Xclipse", ignoreCase = true)) "Experimental: RADV or the system Xclipse driver"
                     else "System PowerVR driver: compatibility varies by device"
+                family == Family.NVIDIA_TEGRA -> "Experimental: Switchroot Android Vulkan bridge; not verified on Switch hardware"
                 family == Family.MALI_OTHER -> "Experimental: Mali through the phone's own driver (Venus)"
                 family.mali -> "Experimental: open Mali driver (test builds)"
                 isA850 -> "Experimental Adreno 850 support: requires compatible experimental display and game drivers; not verified on this device"
@@ -89,6 +91,7 @@ data class GpuInfo(
         Support.TESTED -> R.string.gpuinfo_supported
         Support.UNTESTED -> when {
             family == Family.POWERVR -> if (name.contains("Xclipse", ignoreCase = true)) R.string.gpuinfo_xclipse else R.string.gpuinfo_powervr
+            family == Family.NVIDIA_TEGRA -> R.string.gpuinfo_switchroot_experimental
             isA850 -> R.string.gpuinfo_a850_experimental
             family == Family.A7XX_LOW || family.mali -> R.string.gpuinfo_experimental
             else -> R.string.gpuinfo_below_tested
@@ -103,6 +106,12 @@ data class GpuInfo(
 
         fun detect(): GpuInfo {
             val adreno = File("/sys/class/kgsl/kgsl-3d0").exists() || File("/vendor/lib64/hw/vulkan.adreno.so").exists()
+            val vulkanDevice = VulkanInfo.cachedOrNull()?.get("device").orEmpty()
+            val tegra = !adreno && (com.droiddeck.launcher.core.DeviceSupport.switchrootTegra() ||
+                vulkanDevice.contains("nvidia", ignoreCase = true) || vulkanDevice.contains("tegra", ignoreCase = true) ||
+                systemProperty("ro.board.platform").contains("tegra", ignoreCase = true) ||
+                systemProperty("ro.hardware").contains("tegra", ignoreCase = true) ||
+                (Build.VERSION.SDK_INT >= 31 && Build.SOC_MODEL.contains("tegra", ignoreCase = true)))
             val raw = FileUtils.readString(File("/sys/class/kgsl/kgsl-3d0/gpu_model"))?.trim()
             val chipId = FileUtils.readString(File("/sys/class/kgsl/kgsl-3d0/gpu_chipid"))?.trim().orEmpty()
             val soc = if (adreno) SocNames.label() else ""
@@ -114,13 +123,16 @@ data class GpuInfo(
             ) else 0 to ""
             // Mali, named by the vendor's Vulkan driver ("Mali-G720-Immortalis MC12") or by kbase.
             val mali = if (adreno || !File("/dev/mali0").exists()) null else maliName()
-            val family = familyOf(adreno, model, SystemVulkanDriver.isPowerVr(), mali)
+            val family = familyOf(adreno, model, SystemVulkanDriver.isPowerVr(), mali, tegra)
             val samsung = Build.MANUFACTURER.equals("samsung", ignoreCase = true)
             return GpuInfo(
                 name = when {
                     family == Family.POWERVR -> SystemVulkanDriver.gpuName().let { gpu ->
                         VulkanInfo.cachedOrNull()?.get("device")?.takeIf { it.contains(gpu, ignoreCase = true) } ?: gpu
                     }
+                    family == Family.NVIDIA_TEGRA -> vulkanDevice.takeIf {
+                        it.contains("nvidia", ignoreCase = true) || it.contains("tegra", ignoreCase = true)
+                    } ?: "NVIDIA Tegra X1"
                     mali != null && mali.isNotEmpty() -> mali
                     !adreno -> Build.HARDWARE.ifBlank { UNNAMED }
                     model > 0 -> "Adreno $model"
@@ -226,8 +238,15 @@ data class GpuInfo(
             }
         }
 
-        internal fun familyOf(adreno: Boolean, model: Int, powerVr: Boolean = false, mali: String? = null): Family = when {
+        internal fun familyOf(
+            adreno: Boolean,
+            model: Int,
+            powerVr: Boolean = false,
+            mali: String? = null,
+            tegra: Boolean = false,
+        ): Family = when {
             !adreno && powerVr -> Family.POWERVR
+            !adreno && tegra -> Family.NVIDIA_TEGRA
             !adreno && mali != null -> maliFamily(mali)
             !adreno -> Family.NOT_ADRENO
             model == 0 -> Family.ADRENO_UNKNOWN

@@ -171,7 +171,10 @@ internal fun SetupPanel(
     val colors = MaterialTheme.colorScheme
     val pal = LocalPalette.current
     val gpu = remember { com.droiddeck.launcher.gpu.GpuInfo.detect() }
-    val gpuOk = gpu.support == com.droiddeck.launcher.gpu.GpuInfo.Support.TESTED || s.vkBridge
+    val switchrootGpu = remember { DeviceSupport.switchrootTegra() }
+    val bridgeUsable = remember { DeviceSupport.bridgeUsable() }
+    val gpuOk = gpu.support == com.droiddeck.launcher.gpu.GpuInfo.Support.TESTED ||
+        (s.vkBridge && bridgeUsable && !s.bridgeFellBack)
     val gpuName = remember { DeviceSupport.gpuName(ctx) }
     val limitBlocks = PhantomProcessLimit.blocksSteam(s.phantomProcessStatus)
     val signedIn = s.offlineAccount != null
@@ -249,12 +252,14 @@ internal fun SetupPanel(
                 when (tab) {
                     0 -> {
                         // Setup's "Safe mode" row, under the GPU row while the bridge is on and can be used here.
-                        val bridgeModeRow = !s.adreno && s.vkBridge && com.droiddeck.launcher.core.DeviceSupport.bridgeUsable()
+                        val bridgeModeRow = !s.adreno && s.vkBridge && bridgeUsable && !s.bridgeFellBack
                         val gpuCheck: @Composable (Boolean) -> Unit = { divider ->
                             CheckRow(
                                 if (gpuOk) CheckState.OK else CheckState.WARN,
                                 when {
                                     gpu.support == com.droiddeck.launcher.gpu.GpuInfo.Support.TESTED -> stringResource(R.string.setup_gpu_supported)
+                                    switchrootGpu && s.vkBridge && s.bridgeFellBack -> stringResource(R.string.setup_gpu_switch_bridge_failed)
+                                    switchrootGpu && s.vkBridge && bridgeUsable && !s.bridgeFellBack -> stringResource(R.string.setup_gpu_switch_bridge_status)
                                     gpu.support == com.droiddeck.launcher.gpu.GpuInfo.Support.UNTESTED -> stringResource(R.string.setup_gpu_untested)
                                     s.vkBridge -> stringResource(R.string.setup_gpu_bridged)
                                     else -> stringResource(R.string.setup_gpu_unsupported)
@@ -262,12 +267,18 @@ internal fun SetupPanel(
                                 when (gpu.support) {
                                     com.droiddeck.launcher.gpu.GpuInfo.Support.TESTED -> stringResource(R.string.setup_gpu_detail, gpu.displayName(ctx), gpuName)
                                     com.droiddeck.launcher.gpu.GpuInfo.Support.UNTESTED ->
-                                        if (!s.adreno && s.venus && s.venusHostVulkan != null) stringResource(R.string.setup_gpu_venus_host_too_old, gpu.displayName(ctx), s.venusHostVulkan)
-                                        else if (!s.adreno && s.vkBridge && !com.droiddeck.launcher.core.DeviceSupport.bridgeUsable()) stringResource(R.string.setup_gpu_bridge_unusable, gpu.displayName(ctx))
+                                        if (switchrootGpu && s.vkBridge && s.bridgeFellBack) stringResource(R.string.setup_gpu_switch_bridge_fell_back)
+                                        else if (switchrootGpu && s.vkBridge && !bridgeUsable) stringResource(R.string.setup_gpu_switch_bridge_unusable)
+                                        else if (switchrootGpu && s.vkBridge) stringResource(R.string.setup_gpu_switch_bridge_detail, gpu.displayName(ctx))
+                                        else if (!s.adreno && s.venus && s.venusHostVulkan != null) stringResource(R.string.setup_gpu_venus_host_too_old, gpu.displayName(ctx), s.venusHostVulkan)
+                                        else if (!s.adreno && s.vkBridge && !bridgeUsable) stringResource(R.string.setup_gpu_bridge_unusable, gpu.displayName(ctx))
                                         else if (!s.adreno && s.vkBridge && s.bridgeFellBack) stringResource(if (s.bridgeFellBackMemory) R.string.setup_gpu_bridge_no_memory_sharing else R.string.setup_gpu_bridge_fell_back, gpu.displayName(ctx))
                                         else stringResource(R.string.setup_gpu_untested_detail, gpu.displayName(ctx), gpu.supportText(ctx).replaceFirstChar { it.lowercase() })
                                     else -> if (s.venus && s.venusHostVulkan != null) stringResource(R.string.setup_gpu_venus_host_too_old, gpuName, s.venusHostVulkan)
-                                    else if (s.vkBridge && !com.droiddeck.launcher.core.DeviceSupport.bridgeUsable()) stringResource(R.string.setup_gpu_bridge_unusable, gpuName)
+                                    else if (switchrootGpu && s.vkBridge && s.bridgeFellBack) stringResource(R.string.setup_gpu_switch_bridge_fell_back)
+                                    else if (switchrootGpu && s.vkBridge && !bridgeUsable) stringResource(R.string.setup_gpu_switch_bridge_unusable)
+                                    else if (switchrootGpu && s.vkBridge) stringResource(R.string.setup_gpu_switch_bridge_detail, gpu.displayName(ctx))
+                                    else if (s.vkBridge && !bridgeUsable) stringResource(R.string.setup_gpu_bridge_unusable, gpuName)
                                     else if (s.vkBridge && s.bridgeFellBack) stringResource(if (s.bridgeFellBackMemory) R.string.setup_gpu_bridge_no_memory_sharing else R.string.setup_gpu_bridge_fell_back, gpuName)
                                     else if (s.vkBridge) stringResource(R.string.setup_gpu_bridge_detail, gpuName)
                                     else stringResource(R.string.setup_gpu_unsupported_detail, gpuName)
@@ -275,12 +286,19 @@ internal fun SetupPanel(
                                 divider = divider || bridgeModeRow,
                                 action = if (s.adreno) null else { {
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        SecondaryButton(
+                                        if (!switchrootGpu) SecondaryButton(
                                             stringResource(if (s.venus) R.string.setup_gpu_venus_on else R.string.setup_gpu_venus_off),
                                             enabled = !s.sessionRunning, compact = true, onClick = { a.onVenus(!s.venus) },
                                         )
                                         SecondaryButton(
-                                            stringResource(if (s.vkBridge) R.string.setup_gpu_bridge_on else R.string.setup_gpu_bridge_off),
+                                            stringResource(
+                                                when {
+                                                    switchrootGpu && s.vkBridge -> R.string.setup_gpu_switch_bridge_on
+                                                    switchrootGpu -> R.string.setup_gpu_switch_bridge_off
+                                                    s.vkBridge -> R.string.setup_gpu_bridge_on
+                                                    else -> R.string.setup_gpu_bridge_off
+                                                },
+                                            ),
                                             enabled = !s.sessionRunning, compact = true, onClick = { a.onVkBridge(!s.vkBridge) },
                                         )
                                     }

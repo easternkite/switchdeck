@@ -61,11 +61,11 @@ object GraphicsReport {
         appendLine("path: " + path(context))
         appendLine("driver mode: " + SessionPrefs.gpuDriverMode(context))
         appendLine("display driver (compositor): " + SessionPrefs.androidDriver(context).ifEmpty {
-            if (DeviceSupport.adreno()) "(auto: bundled Turnip)" else "(auto: the phone's own Vulkan driver, ${SystemVulkanDriver.hal() ?: "vendor HAL"})"
+            if (DeviceSupport.adreno()) "(auto: bundled Turnip)" else "(auto: the Android device's own Vulkan driver, ${SystemVulkanDriver.hal() ?: "vendor HAL"})"
         })
         val display = SessionPrefs.androidDriver(context)
         appendLine("display driver chosen by: " + when {
-            display.isEmpty() -> "auto (or a pair on a non-Adreno GPU: the phone's own driver)"
+            display.isEmpty() -> "auto (or a pair on a non-Adreno GPU: the Android device's own driver)"
             DriverBundle.containing(context, display, false) != null -> "pair (its display half)"
             else -> "user (picked on its own)"
         })
@@ -90,7 +90,7 @@ object GraphicsReport {
         }
         appendLine("frame generation: " + runCatching { com.droiddeck.launcher.gpu.FrameGen.mode(context).toString() }.getOrDefault("?") +
             " (engine=off means it is switched off in Play settings; a driver that fails LSFG's gates logs \"device gates\" below)")
-        appendLine("mali bridge setting: " + SessionPrefs.vkBridge(context) + ", in use: " + DeviceSupport.vkBridge(context))
+        appendLine("Android Vulkan bridge setting: " + SessionPrefs.vkBridge(context) + ", in use: " + DeviceSupport.vkBridge(context))
         val standIn = runCatching { com.droiddeck.launcher.runtime.LinuxRuntime.gpuStandIn(context) }.getOrNull()
         appendLine("render node for the guest: " + (standIn?.let { node ->
             com.droiddeck.launcher.runtime.LinuxRuntime.deviceNumbers(node)?.let { n -> "/dev/dri/renderD${n.substringAfter(':')} -> $node ($n)" } ?: node
@@ -123,7 +123,8 @@ object GraphicsReport {
     private fun path(context: Context): String = when {
         DeviceSupport.adreno() -> "Turnip (Adreno, KGSL)"
         VenusComponent.wanted(context) -> "Mali (Venus): Mesa Venus over vtest to the phone's own Vulkan driver, with the Mali compatibility layer"
-        DeviceSupport.vkBridge(context) -> "Mali bridge (#517): the phone's own Vulkan driver through the bridge"
+        DeviceSupport.vkBridge(context) && DeviceSupport.switchrootTegra() -> "Switchroot Tegra: Android Vulkan through the bridge"
+        DeviceSupport.vkBridge(context) -> "Mali bridge (#517): the Android device's own Vulkan driver through the bridge"
         DeviceSupport.openDriverActive(context) -> "open driver pair (PanVK / RADV)"
         SystemVulkanDriver.usesDefault(SessionPrefs.linuxDriver(context)) && SystemVulkanDriver.isAvailable() ->
             "system Vulkan (#570): ${SystemVulkanDriver.gpuName()} driver through libhybris"
@@ -193,8 +194,8 @@ object GraphicsReport {
             report.appendText(buildString {
                 limits?.let { appendLine("open files limit: $it") }
                 fellBack?.let {
-                    if (fallbackReason == "memory") appendLine("!! MALI BRIDGE FELL BACK: memory sharing = none (no method passed the server's self-test); the session ran on $it")
-                    else appendLine("!! MALI BRIDGE FELL BACK: the self-test failed images or draws; the session ran on $it")
+                    if (fallbackReason == "memory") appendLine("!! VULKAN BRIDGE FELL BACK: memory sharing = none (no method passed the server's self-test); the session ran on $it")
+                    else appendLine("!! VULKAN BRIDGE FELL BACK: the self-test failed images or draws; the session ran on $it")
                 }
                 com.droiddeck.launcher.wayland.WaylandCompositor.compositorFault().takeIf { it.isNotEmpty() }?.let {
                     appendLine("!! DISPLAY FAILED: $it")
@@ -211,7 +212,7 @@ object GraphicsReport {
                     appendLine("!! SOUND: Android refused the audio output (AAUDIO_ERROR_DISCONNECTED) - rebooting the phone usually fixes this")
                 }
                 if (guestLines.any { it.contains("vkbridge", ignoreCase = true) && it.contains("FAIL") }) {
-                    appendLine("!! MALI BRIDGE SELF-TEST FAILED: this GPU's driver did not pass the bridge's checks (see below)")
+                    appendLine("!! VULKAN BRIDGE SELF-TEST FAILED: this GPU's driver did not pass the bridge's checks (see below)")
                 }
                 if (guestLines.any { it.contains("MEM_EXEC_INIT") }) {
                     appendLine("note: kbase refused KBASE_IOCTL_MEM_EXEC_INIT with EPERM. That answer comes from the kbase driver")

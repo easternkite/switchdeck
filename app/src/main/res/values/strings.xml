@@ -30,7 +30,7 @@
     <string name="steamvr_recovery_cancel">Keep open</string>
     <string name="steamvr_recovery_restarting">Resetting graphics and reopening SteamVR…</string>
     <string name="steamvr_recovery_failed">DroidDeck could not restart automatically. Close the app completely, then reopen it.</string>
-    <string name="app_name">DroidDeck</string>
+    <string name="app_name">SwitchDeck</string>
     <string name="steam_wall_label" translatable="false">DroidDeck Wall</string>
     <string name="wall_settings_fps" translatable="false">Frame rate (fps)</string>
     <string name="wall_settings_match" translatable="false">Match screen</string>
@@ -2338,6 +2338,7 @@
     <string name="cmgr_powervr_dxvk_managed">DXVK is provided by the system PowerVR runtime. Other DXVK packages can be stored but are not applied with this driver.</string>
     <string name="gpuinfo_supported">Supported</string>
     <string name="gpuinfo_experimental">Experimental: its drivers are test builds</string>
+    <string name="gpuinfo_switchroot_experimental">Experimental: Switchroot Android NVIDIA Vulkan bridge; not verified on Switch hardware</string>
     <string name="gpuinfo_a850_experimental">Experimental Adreno 850 support: requires compatible experimental display and game drivers; not verified on this device</string>
     <string name="gpuinfo_below_tested">Below tested hardware (Adreno 725 and newer): it may not run</string>
     <string name="gpuinfo_unsupported">Not supported: no compatible graphics backend is available for this GPU</string>
@@ -2902,6 +2903,13 @@
     <string name="setup_gpu_bridge_unusable">%1$s cannot use the Mali bridge (it needs a Mali GPU without a system-driver route), so this switch has no effect here.</string>
     <string name="setup_gpu_bridge_on">Mali bridge: on</string>
     <string name="setup_gpu_bridge_detail">%1$s is not an Adreno. The experimental Vulkan bridge is on: the session draws through the phone\'s own driver. Expect bugs; send the session logs.</string>
+    <string name="setup_gpu_switch_bridge_status">Switchroot Vulkan bridge (experimental)</string>
+    <string name="setup_gpu_switch_bridge_off">Switchroot Vulkan bridge: off</string>
+    <string name="setup_gpu_switch_bridge_on">Switchroot Vulkan bridge: on</string>
+    <string name="setup_gpu_switch_bridge_detail">%1$s is using the Android NVIDIA Vulkan driver through the experimental bridge. Switch hardware and game compatibility have not been verified.</string>
+    <string name="setup_gpu_switch_bridge_unusable">The Switchroot bridge needs Android 14 or newer and an NVIDIA/Tegra Vulkan 1.1 or newer driver. It is unavailable on this build.</string>
+    <string name="setup_gpu_switch_bridge_failed">Switchroot Vulkan bridge failed last session</string>
+    <string name="setup_gpu_switch_bridge_fell_back">The Vulkan bridge failed its last session self-test. Graphics compatibility is not confirmed; include the session log in reports.</string>
     <string name="touch_paste">Paste</string>
     <string name="touch_dpad">D-pad</string>
     <string name="touch_left_stick">Left stick</string>

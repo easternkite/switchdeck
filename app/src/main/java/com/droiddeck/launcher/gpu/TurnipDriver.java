@@ -310,7 +310,7 @@ public final class TurnipDriver {
         String quest = QuestExperimental.INSTANCE.defaultAndroidDriver();
         if (quest != null) return quest;
         if (com.droiddeck.launcher.core.DeviceSupport.INSTANCE.vkBridge(context)) {
-            Log.i(TAG, "Mali bridge: the compositor uses the system Vulkan driver");
+            Log.i(TAG, "Android Vulkan bridge: the compositor uses the system Vulkan driver");
             return null;
         }
         GpuInfo gpu = gpuDetector.get();

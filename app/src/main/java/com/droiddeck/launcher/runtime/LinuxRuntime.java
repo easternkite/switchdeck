@@ -314,6 +314,7 @@ public final class LinuxRuntime {
     }
 
     public static final String MALI_DEVICE = "/dev/mali0";
+    public static final String TEGRA_DEVICE = "/dev/nvhost-gpu";
 
     static final String[] DRM_RENDER_NODES = {
         "/dev/dri/renderD128", "/dev/dri/renderD129", "/dev/dri/renderD130", "/dev/dri/renderD131",
@@ -328,6 +329,7 @@ public final class LinuxRuntime {
 
     static String bridgeStandIn(java.util.function.Predicate<String> exists) {
         if (exists.test(MALI_DEVICE)) return MALI_DEVICE;
+        if (exists.test(TEGRA_DEVICE)) return TEGRA_DEVICE;
         for (String node : DRM_RENDER_NODES) if (exists.test(node)) return node;
         return null;
     }
@@ -347,6 +349,7 @@ public final class LinuxRuntime {
         String standIn = gpuStandIn(context);
         if (standIn == null) return;
         boolean kgsl = standIn.equals(KGSL_DEVICE);
+        boolean tegra = standIn.equals(TEGRA_DEVICE) || com.droiddeck.launcher.core.DeviceSupport.INSTANCE.switchrootTegra();
         StructStat st;
         try {
             st = Os.stat(standIn);
@@ -369,7 +372,9 @@ public final class LinuxRuntime {
             Files.write(new File(drm, "dev").toPath(),
                     (major + ":" + minor + "\n").getBytes(StandardCharsets.UTF_8));
             Files.write(new File(device, "uevent").toPath(),
-                    (kgsl ? "DRIVER=kgsl-3d0\nMODALIAS=platform:kgsl-3d0\n" : "DRIVER=mali\nMODALIAS=platform:mali\n")
+                    (kgsl ? "DRIVER=kgsl-3d0\nMODALIAS=platform:kgsl-3d0\n" :
+                            tegra ? "DRIVER=tegra\nMODALIAS=platform:nvhost-gpu\n" :
+                                    "DRIVER=mali\nMODALIAS=platform:mali\n")
                             .getBytes(StandardCharsets.UTF_8));
             File subsystem = new File(device, "subsystem");
             if (!Files.isSymbolicLink(subsystem.toPath())) {

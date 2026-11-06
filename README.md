@@ -5,13 +5,15 @@
   </picture>
 </p>
 
-DroidDeck brings the SteamOS experience to Android: Steam Gaming Mode, full Linux desktop, integration with GOG, Epic Games, Xbox, and other storefronts, Steam VR, and more!
+SwitchDeck is a fork of DroidDeck with an experimental graphics path for Nintendo Switch consoles running Switchroot Android. See the [Switchroot Android support notes](docs/switchroot-android.md) before building or installing it.
+
+It brings the SteamOS experience to Android: Steam Gaming Mode, a full Linux desktop, integration with GOG, Epic Games, Xbox, and other storefronts, Steam VR, and more!
 
 <p align="center"><b>100% open source. No ads. No telemetry. No source withheld.</b></p>
 
 <p align="center">
-  <a href="https://github.com/Droid-Deck/DroidDeck/releases/download/0.6.9/DroidDeck-0.6.9.apk"><img src="https://img.shields.io/badge/Download-DroidDeck%200.6.9%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download DroidDeck 0.6.9"></a>
-  <a href="https://discord.gg/JRGAvawjsm"><img src="https://img.shields.io/badge/Discord-Join%20us-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Join the DroidDeck Discord"></a>
+  <a href="https://github.com/easternkite/switchdeck/releases"><img src="https://img.shields.io/badge/SwitchDeck-Releases-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="SwitchDeck releases"></a>
+  <a href="https://discord.gg/JRGAvawjsm"><img src="https://img.shields.io/badge/DroidDeck-Upstream%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="DroidDeck upstream community"></a>
 </p>
 
 <p align="center">
@@ -25,7 +27,7 @@ DroidDeck brings the SteamOS experience to Android: Steam Gaming Mode, full Linu
 
 <p align="center"><img src="docs/media/steam-to-desktop.gif" width="100%" alt="On a Retroid Pocket Duo: Play Steam from the DroidDeck launcher, open Pac-Man in Steam Big Picture and play it, exit the game, then Switch to Desktop from the Power menu"></p>
 
-> DroidDeck has no website. Only download it from this repository's [Releases](https://github.com/Droid-Deck/DroidDeck/releases).
+> SwitchDeck is source-first and has not published an APK yet. Build it from this repository; see [Build](#build).
 
 <p align="center">
   <img src="docs/releases/media/0.6.7/library.gif" width="49%" alt="The Library switching source chips, changing the card size and opening the Filter menu">
@@ -36,9 +38,9 @@ DroidDeck brings the SteamOS experience to Android: Steam Gaming Mode, full Linu
 
 ## Install
 
-1. Android 9 or newer on Adreno 730 or newer, or any 8xx. Adreno 6xx is experimental. Mali, Xclipse, PowerVR and Adreno 710 are unsupported. No root needed.
+1. Android 9 or newer on Adreno 730 or newer, or any 8xx. Adreno 6xx is experimental. Mali, Xclipse, PowerVR and Adreno 710 are unsupported. Switchroot Android 14 or newer on a Nintendo Switch has an experimental Vulkan bridge; see the support notes. No root needed.
 2. About 3 GB free for the runtime, plus 1.1 GB for the desktop and emulators.
-3. Install the [APK](https://github.com/Droid-Deck/DroidDeck/releases/download/0.6.9/DroidDeck-0.6.9.apk), install the Linux runtime, press **Play** and sign in to Steam.
+3. Install a SwitchDeck APK built from this repository, install the Linux runtime, press **Play** and sign in to Steam.
 4. On Android 14 and newer, turn on **Disable child process restrictions** in Developer options. On Android 12 and 13, Steam's first launch shows a **Fix it for me** button that walks you through it.
 
 Smart glasses setup is in the [support matrix](docs/smart-glasses-support.md). Release notes are in [docs/releases](docs/releases).

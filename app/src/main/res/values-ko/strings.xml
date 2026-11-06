@@ -7,7 +7,7 @@
     <string name="steamvr_recovery_cancel">열어 두기</string>
     <string name="steamvr_recovery_restarting">그래픽을 초기화하고 SteamVR을 다시 여는 중…</string>
     <string name="steamvr_recovery_failed">DroidDeck을 자동으로 다시 시작하지 못했습니다. 앱을 완전히 종료한 후 다시 여세요.</string>
-    <string name="app_name">DroidDeck</string>
+    <string name="app_name">SwitchDeck</string>
     <string-array name="loading_hints">
         <item>첫 실행 시 Steam을 다운로드합니다. 몇 분 정도 걸릴 수 있습니다.</item>
         <item>기본적으로 앱을 나가면 Steam이 일시 중지되며, 다시 돌아오면 중단된 부분부터 재개됩니다.</item>
@@ -2091,6 +2091,7 @@
     <string name="gpuinfo_not_adreno">Adreno GPU가 아님</string>
     <string name="gpuinfo_supported">지원됨</string>
     <string name="gpuinfo_experimental">실험적: 드라이버가 테스트 빌드입니다</string>
+    <string name="gpuinfo_switchroot_experimental">실험적: Switchroot Android NVIDIA Vulkan 브리지이며, Switch 하드웨어에서 검증되지 않았습니다</string>
     <string name="gpuinfo_a850_experimental">실험적 Adreno 850 지원: 호환되는 실험용 디스플레이 및 게임 드라이버가 필요하며, 이 기기에서 검증되지 않았습니다</string>
     <string name="gpuinfo_below_tested">테스트된 하드웨어(Adreno 725 이상)보다 낮음: 실행되지 않을 수 있습니다</string>
     <string name="gpuinfo_unsupported">지원되지 않음: 이 GPU에서 사용할 수 있는 호환 그래픽 백엔드가 없습니다</string>
@@ -3529,6 +3530,13 @@
     <string name="setup_gpu_bridge_off">Mali 브리지: 끔</string>
     <string name="setup_gpu_bridge_on">Mali 브리지: 켬</string>
     <string name="setup_gpu_bridge_detail">%1$s은(는) Adreno가 아닙니다. 실험적 Vulkan 브리지가 켜져 있어 세션이 휴대폰 자체 드라이버로 그립니다. 버그가 있을 수 있으니 세션 로그를 보내 주세요.</string>
+    <string name="setup_gpu_switch_bridge_status">Switchroot Vulkan 브리지(실험적)</string>
+    <string name="setup_gpu_switch_bridge_off">Switchroot Vulkan 브리지: 끔</string>
+    <string name="setup_gpu_switch_bridge_on">Switchroot Vulkan 브리지: 켬</string>
+    <string name="setup_gpu_switch_bridge_detail">%1$s에서 Android NVIDIA Vulkan 드라이버를 실험용 브리지로 사용합니다. Switch 하드웨어 및 게임 호환성은 아직 검증되지 않았습니다.</string>
+    <string name="setup_gpu_switch_bridge_unusable">Switchroot 브리지는 Android 14 이상과 NVIDIA/Tegra Vulkan 1.1 이상 드라이버가 필요합니다. 현재 빌드에서는 사용할 수 없습니다.</string>
+    <string name="setup_gpu_switch_bridge_failed">지난 세션에서 Switchroot Vulkan 브리지 실패</string>
+    <string name="setup_gpu_switch_bridge_fell_back">지난 세션 자체 검사에서 Vulkan 브리지가 실패했습니다. 그래픽 호환성을 확인하지 못했으니 문제 보고 시 세션 로그를 포함해 주세요.</string>
     <string name="setup_bridge_safe">안전 모드</string>
     <string name="setup_bridge_safe_on">안전 모드: 켬</string>
     <string name="setup_bridge_safe_off">안전 모드: 끔</string>

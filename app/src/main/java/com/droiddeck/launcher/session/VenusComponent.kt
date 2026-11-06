@@ -66,7 +66,8 @@ class VenusComponent(private val logFile: File?) : SessionPart() {
          */
         @JvmStatic
         fun wanted(context: Context): Boolean =
-            !DeviceSupport.adreno() && !com.droiddeck.launcher.gpu.SystemVulkanDriver.isAvailable() &&
+            !DeviceSupport.adreno() && !DeviceSupport.switchrootTegra() &&
+                !com.droiddeck.launcher.gpu.SystemVulkanDriver.isAvailable() &&
                 SessionPrefs.venus(context) && available(context) && hostVulkanTooOld(context) == null
 
         /** The phone driver's Vulkan version when it is below 1.2: gamescope skips such a device, so Venus cannot run. */
